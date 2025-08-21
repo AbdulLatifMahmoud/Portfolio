@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Abdullatif Mahmoud — Portfolio</title>
+  <meta name="description" content="Portfolio website with an embedded PDF and download link." />
+  <meta property="og:title" content="Abdullatif Mahmoud — Portfolio" />
+  <meta property="og:description" content="View or download my PDF portfolio." />
+  <meta property="og:type" content="website" />
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-soft: #121831;
+      --text: #e7eaf6;
+      --muted: #a9b1d6;
+      --accent: #8fb3ff;
+      --accent-2: #b28dff;
+      --card: #0f1530;
+      --ring: rgba(143,179,255,.45);
+    }
+    *{box-sizing:border-box}
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background: radial-gradient(1200px 800px at 10% -10%, rgba(178,141,255,.12), transparent 60%),
+                  radial-gradient(1200px 800px at 110% 10%, rgba(143,179,255,.12), transparent 60%),
+                  var(--bg);
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    header {
+      display: grid; gap: 18px; align-items: center; grid-template-columns: auto 1fr; margin-bottom: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 16px; padding: 16px; backdrop-filter: blur(6px);
+    }
+    .avatar { width: 64px; height: 64px; border-radius: 50%; border: 2px solid rgba(255,255,255,.15); object-fit: cover; background:#222 }
+    h1 { font-size: clamp(22px, 2.2vw, 32px); margin: 0; letter-spacing: .3px; }
+    p.tag { margin: 0; color: var(--muted); }
+    .btns { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+    .btn {
+      appearance: none; border: 0; cursor: pointer; text-decoration: none; color: #0b1020; font-weight: 600;
+      padding: 10px 14px; border-radius: 12px; background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      box-shadow: 0 8px 20px -8px var(--ring);
+    }
+    .btn.secondary { background: transparent; color: var(--text); border:1px solid rgba(255,255,255,.18); }
+    main.card {
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 16px; padding: 12px; min-height: calc(100vh - 210px);
+    }
+    .viewer { position: relative; border-radius: 12px; overflow: hidden; background: var(--card); }
+    iframe, object { width: 100%; height: min(85vh, 1200px); border: 0; display: block; }
+    .fallback { padding: 22px; color: var(--muted); text-align: center; }
+    footer { color: var(--muted); text-align:center; padding: 22px 0 10px; font-size: 14px; }
+    .notice { font-size: 13px; color: var(--muted); }
+    @media (max-width: 640px){
+      header{ grid-template-columns: 1fr; text-align:center }
+      .avatar{ margin: 0 auto }
+      .btns{ justify-content:center }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <!-- Optional: replace src with your headshot; remove if not needed -->
+      <img class="avatar" src="assets/avatar.jpg" alt="Profile" />
+      <div>
+        <h1>Abdullatif Mahmoud</h1>
+        <p class="tag">Structural Engineer • Designer</p>
+        <div class="btns">
+          <a id="viewBtn" class="btn" href="#">View PDF</a>
+          <a id="downloadBtn" class="btn secondary" href="#" download>Download PDF</a>
+        </div>
+        <p class="notice">If the embedded viewer is blocked by your browser, use the buttons above.</p>
+      </div>
+    </header>
+
+    <main class="card">
+      <div class="viewer" id="pdfContainer">
+        <div class="fallback" id="fallback">
+          Loading PDF… If nothing appears, click <a id="fallbackLink" href="#">here</a>.
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      © <span id="y"></span> Abdullatif Mahmoud
+    </footer>
+  </div>
+
+  <script>
+    // ---- CONFIG: set your PDF relative path here ----
+    const PDF_PATH = 'Abdullatif Protofolio.pdf';
+    // -----------------------------------------------
+
+    const y = document.getElementById('y');
+    y.textContent = new Date().getFullYear();
+
+    const viewBtn = document.getElementById('viewBtn');
+    const dlBtn = document.getElementById('downloadBtn');
+    const fallbackLink = document.getElementById('fallbackLink');
+    const container = document.getElementById('pdfContainer');
+
+    viewBtn.href = PDF_PATH + '#toolbar=1&zoom=page-width';
+    dlBtn.href = PDF_PATH;
+    fallbackLink.href = PDF_PATH;
+
+    // Try to embed using <iframe>; fall back to a link if blocked
+    function embedPDF() {
+      const iframe = document.createElement('iframe');
+      iframe.loading = 'lazy';
+      iframe.referrerPolicy = 'no-referrer';
+      iframe.src = PDF_PATH + '#toolbar=1&navpanes=0&view=FitH&zoom=page-width';
+      iframe.addEventListener('error', showFallback);
+      iframe.addEventListener('load', () => {
+        // Remove fallback text after a short delay in case of CSP blocks
+        setTimeout(() => {
+          const fb = document.getElementById('fallback');
+          if (fb) fb.remove();
+        }, 400);
+      });
+      container.appendChild(iframe);
+    }
+
+    function showFallback(){
+      const fb = document.getElementById('fallback');
+      if (fb) fb.innerHTML = 'Your browser blocked the embedded viewer. <a href="' + PDF_PATH + '">Open the PDF</a> or use the buttons above.';
+    }
+
+    // Feature detection (very permissive):
+    const canEmbed = 'PDF' in window || navigator.mimeTypes['application/pdf'];
+    if (canEmbed) embedPDF(); else showFallback();
+  </script>
+</body>
+</html>
